@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Assignments | StudentTask</title>
+<style>
+:root{--navy:#14213d;--blue:#3157d5;--light:#f4f7fc;--ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--green:#15966a;--red:#d64545;--amber:#b7791f}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--light);color:var(--ink)}
+header{background:linear-gradient(120deg,#14213d,#3157d5);color:#fff;padding:22px clamp(16px,4vw,48px);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:22px;letter-spacing:.2px}.brand small{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:4px}
+header .tag{font-size:13px;background:#ffffff20;border:1px solid #ffffff55;padding:8px 12px;border-radius:20px}
+.shell{max-width:1180px;margin:28px auto;padding:0 18px;display:grid;grid-template-columns:220px 1fr;gap:22px}
+nav,.panel,.stat{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #1b2a4b08}
+nav{padding:14px;height:max-content}nav button{display:block;width:100%;text-align:left;padding:13px;border:0;background:transparent;color:#475569;border-radius:10px;font-size:14px;cursor:pointer;margin:3px 0}nav button.active,nav button:hover{background:#eaf0ff;color:var(--blue);font-weight:700}
+main{min-width:0}.heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.heading h1{margin:0;font-size:26px}.heading p{margin:6px 0 0;color:var(--muted);font-size:14px}
+button,.btn{cursor:pointer}.primary{border:0;background:var(--blue);color:white;padding:11px 15px;border-radius:10px;font-weight:700}.secondary{border:1px solid var(--line);background:white;padding:9px 12px;border-radius:9px;color:var(--ink)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}.stat{padding:17px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:27px;margin-top:8px}.stat:nth-child(2) strong{color:var(--blue)}.stat:nth-child(3) strong{color:var(--green)}.stat:nth-child(4) strong{color:var(--red)}
+.panel{padding:18px;margin-bottom:18px}.panel h2{font-size:17px;margin:0 0 14px}.tools{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.tools input,.tools select,input,select,textarea{font:inherit}.tools input,.tools select{padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff}.tools input{flex:1;min-width:170px}
+table{border-collapse:collapse;width:100%;font-size:13px}th{text-align:left;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.5px;background:#f8fafc}td,th{padding:13px 10px;border-bottom:1px solid var(--line)}tbody tr:last-child td{border-bottom:0}.pill{display:inline-block;border-radius:20px;padding:5px 8px;font-size:11px;font-weight:700;background:#eaf0ff;color:#3157d5}.pill.done{background:#e0f7ed;color:#08784e}.pill.overdue{background:#fee2e2;color:#b91c1c}.pill.high{background:#fff0d6;color:#9a5b00}.actions{white-space:nowrap}.actions button{border:1px solid var(--line);background:#fff;padding:6px 8px;border-radius:7px;margin:2px;font-size:12px}.empty{color:var(--muted);text-align:center;padding:28px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px;background:white}.field.full{grid-column:1/-1}.field textarea{min-height:80px;resize:vertical}.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.notice{padding:11px 13px;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-size:13px;margin-bottom:14px}.progress{height:8px;background:#e2e8f0;border-radius:8px;overflow:hidden;margin-top:12px}.progress div{height:100%;background:var(--green);width:0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 28px}
+@media(max-width:820px){.shell{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}nav{display:flex;gap:4px;overflow:auto}nav button{white-space:nowrap;width:auto}.table-wrap{overflow-x:auto}table{min-width:760px}}
+@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.heading h1{font-size:22px}}
+</style>
+</head>
+<body>
+<header><div class="brand">✓ StudentTask <small>Manage Assignments Application</small></div><div class="tag">Organize • Prioritize • Complete</div></header>
+<div class="shell">
+<nav aria-label="Main navigation">
+<button class="active" data-view="dashboard">▦ &nbsp; Dashboard</button>
+<button data-view="assignments">☷ &nbsp; Manage Assignments</button>
+<button data-view="add">＋ &nbsp; Add Assignment</button>
+<button data-view="help">ⓘ &nbsp; How to Use</button>
+</nav>
+<main id="main"></main>
+</div>
+<footer>StudentTask · Manage Assignments · Data is saved in this browser on this device.</footer>
+<script>
+const KEY='studentTaskAssignmentsV2';
+let assignments=[];
+try{assignments=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){assignments=[]}
+if(!assignments.length){assignments=[
+{id:1,title:'Web Security Essentials',subject:'Application Development',due:future(2),priority:'High',status:'Pending',notes:'Prepare examples of XSS, SQL injection, and CSRF.'},
+{id:2,title:'Library System Documentation',subject:'System Analysis',due:future(4),priority:'Medium',status:'Pending',notes:'Finalize the system purpose and workflow.'},
+{id:3,title:'Python Exercises',subject:'Programming',due:future(-1),priority:'High',status:'Pending',notes:'Complete the practice problems.'},
+{id:4,title:'UI Prototype',subject:'Human Computer Interaction',due:future(-3),priority:'Low',status:'Completed',notes:'Submit the prototype screenshots.'}
+];save()}
+function future(n){let d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+function save(){localStorage.setItem(KEY,JSON.stringify(assignments))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function status(a){if(a.status==='Completed')return 'Completed';if(a.due && a.due<future(0))return 'Overdue';return 'Pending'}
+function fmt(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+function setView(v){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='dashboard')dashboard();if(v==='assignments')listPage();if(v==='add')formPage();if(v==='help')helpPage()}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+function heading(title,sub,button=''){return `<div class="heading"><div><h1>${title}</h1><p>${sub}</p></div>${button}</div>`}
+function dashboard(){let total=assignments.length,done=assignments.filter(a=>a.status==='Completed').length,pending=assignments.filter(a=>status(a)==='Pending').length,overdue=assignments.filter(a=>status(a)==='Overdue').length,pct=total?Math.round(done/total*100):0;
+document.getElementById('main').innerHTML=heading('Dashboard','A quick overview of your academic tasks.',`<button class="primary" onclick="formPage()">＋ Add Assignment</button>`)+
+`<div class="stats"><div class="stat"><span>Total assignments</span><strong>${total}</strong></div><div class="stat"><span>Pending</span><strong>${pending}</strong></div><div class="stat"><span>Completed</span><strong>${done}</strong></div><div class="stat"><span>Overdue</span><strong>${overdue}</strong></div></div>
+<div class="panel"><h2>Overall progress</h2><div><b>${pct}%</b> completed</div><div class="progress"><div style="width:${pct}%"></div></div></div>
+<div class="panel"><h2>Upcoming assignments</h2>${tableRows(assignments.filter(a=>a.status!=='Completed').sort((a,b)=>(a.due||'').localeCompare(b.due||'')).slice(0,5),false)}</div>`}
+function tableRows(items,actions=true){if(!items.length)return '<div class="empty">No assignments found. Add an assignment to get started.</div>';return `<div class="table-wrap"><table><thead><tr><th>Assignment</th><th>Subject</th><th>Due date</th><th>Priority</th><th>Status</th>${actions?'<th>Actions</th>':''}</tr></thead><tbody>${items.map(a=>{let s=status(a);return `<tr><td><b>${esc(a.title)}</b><br><small style="color:#64748b">${esc(a.notes||'')}</small></td><td>${esc(a.subject)}</td><td>${fmt(a.due)}</td><td><span class="pill ${a.priority==='High'?'high':''}">${esc(a.priority)}</span></td><td><span class="pill ${s==='Completed'?'done':s==='Overdue'?'overdue':''}">${s}</span></td>${actions?`<td class="actions"><button onclick="toggleDone(${a.id})">${a.status==='Completed'?'Reopen':'✓ Done'}</button><button onclick="editItem(${a.id})">Edit</button><button onclick="deleteItem(${a.id})">Delete</button></td>`:''}</tr>`}).join('')}</tbody></table></div>`}
+function listPage(){document.getElementById('main').innerHTML=heading('Manage Assignments','Create, search, update, and track your schoolwork.',`<button class="primary" onclick="formPage()">＋ Add Assignment</button>`)+`<div class="panel"><div class="tools"><input id="search" placeholder="Search title, subject, or notes…" oninput="filterRows()"><select id="filter" onchange="filterRows()"><option value="All">All statuses</option><option>Pending</option><option>Completed</option><option>Overdue</option></select><select id="priorityFilter" onchange="filterRows()"><option value="All">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select></div><div id="results">${tableRows(assignments)}</div></div>`}
+function filterRows(){let q=document.getElementById('search').value.toLowerCase(),f=document.getElementById('filter').value,p=document.getElementById('priorityFilter').value;let arr=assignments.filter(a=>(a.title+' '+a.subject+' '+a.notes).toLowerCase().includes(q)&&(f==='All'||status(a)===f)&&(p==='All'||a.priority===p));document.getElementById('results').innerHTML=tableRows(arr)}
+function formPage(id=null){let a=id?assignments.find(x=>x.id===id):null;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='add'));document.getElementById('main').innerHTML=heading(a?'Edit Assignment':'Add Assignment',a?'Update the assignment details below.':'Enter the details of your new assignment.')+`<div class="panel"><div class="notice">Fields marked with * are required. Your changes are saved in this browser.</div><form id="assignmentForm"><div class="form-grid"><div class="field"><label>Assignment title *</label><input name="title" required maxlength="100" value="${esc(a?.title||'')}" placeholder="e.g. Chapter 2 activity"></div><div class="field"><label>Subject / Course *</label><input name="subject" required value="${esc(a?.subject||'')}" placeholder="e.g. Application Development"></div><div class="field"><label>Due date *</label><input type="date" name="due" required value="${esc(a?.due||'')}"></div><div class="field"><label>Priority</label><select name="priority"><option ${a?.priority==='Low'?'selected':''}>Low</option><option ${!a||a.priority==='Medium'?'selected':''}>Medium</option><option ${a?.priority==='High'?'selected':''}>High</option></select></div><div class="field"><label>Status</label><select name="status"><option ${!a||a.status==='Pending'?'selected':''}>Pending</option><option ${a?.status==='Completed'?'selected':''}>Completed</option></select></div><div class="field full"><label>Notes / Instructions</label><textarea name="notes" placeholder="Add reminders or important instructions…">${esc(a?.notes||'')}</textarea></div></div><div class="form-actions"><button type="button" class="secondary" onclick="setView('assignments')">Cancel</button><button class="primary" type="submit">Save Assignment</button></div></form></div>`;
+document.getElementById('assignmentForm').addEventListener('submit',e=>{e.preventDefault();let fd=new FormData(e.target),obj={title:fd.get('title').trim(),subject:fd.get('subject').trim(),due:fd.get('due'),priority:fd.get('priority'),status:fd.get('status'),notes:fd.get('notes').trim()};if(id){assignments=assignments.map(x=>x.id===id?{...x,...obj}:x)}else{obj.id=Date.now();assignments.unshift(obj)}save();setView('assignments')})}
+function editItem(id){formPage(id)}
+function toggleDone(id){assignments=assignments.map(a=>a.id===id?{...a,status:a.status==='Completed'?'Pending':'Completed'}:a);save();listPage()}
+function deleteItem(id){let a=assignments.find(x=>x.id===id);if(confirm('Delete "'+a.title+'"? This cannot be undone.')){assignments=assignments.filter(x=>x.id!==id);save();listPage()}}
+function helpPage(){document.getElementById('main').innerHTML=heading('How to Use','A simple guide to managing assignments.')+`<div class="panel"><h2>Getting started</h2><ol><li>Choose <b>Add Assignment</b> and enter the title, subject, due date, priority, status, and notes.</li><li>Open <b>Manage Assignments</b> to search or filter your task list.</li><li>Use <b>Edit</b> to update details, <b>✓ Done</b> to change completion status, or <b>Delete</b> to remove an item.</li><li>Visit the dashboard to review totals and overall progress.</li></ol><div class="notice">Important: this demo saves information in your current browser using local storage. Data is not automatically shared across devices or users. Export or back up your data before clearing browser storage.</div><h2>Features</h2><p>Responsive layout · Search and filters · Due-date tracking · Priority labels · Progress overview · Browser-based saving</p></div>`}
+dashboard();
+</script>
+</body></html>
